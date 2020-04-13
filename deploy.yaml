@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: netflow-dashboard
+    tier: frontend
+  type: NodePort
+  externalIPs:
+  - <external-ip> 
+  ports:
+  - protocol: TCP
+    port: 80 ##內部訪問用
+    targetPort: 80 ## container port
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: netflow-dashboard
+  labels:
+    app: netflow-dashboard
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: netflow-dashboard
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: netflow-dashboard
+        tier: frontend
+    spec:
+      imagePullSecrets:
+      - name: gitlab-auth
+      containers:
+      - name: netflow-dashboard
+        image: "registry.gitlab.com/ashspencil2014/netflow_dashboard:v0.0.2"
+        ports:
+        - containerPort: 80
